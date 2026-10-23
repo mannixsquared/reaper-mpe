@@ -1,6 +1,6 @@
 # REAPER MPE Editor
 
-A C++ / Objective-C++ macOS extension that draws per-note pitch curves inside REAPER's **existing MIDI editor**. Edit mode stays on across strokes and note selections. No replacement editor or audio effect is involved.
+A C++ REAPER extension for macOS and Windows (Windows UI preview) that draws per-note pitch curves inside REAPER's **existing MIDI editor**. Edit mode stays on across strokes and note selections. No replacement editor or audio effect is involved.
 
 ## Try it
 
@@ -85,3 +85,20 @@ Install defaults to `~/Library/Application Support/REAPER/UserPlugins/reaper_mpe
 Source layout: `src/plugin.mm` contains the REAPER/Cocoa integration; `src/curve.h` contains curve and allocation logic; `src/view_state.h` parses editor geometry. Tests live in `tests/`.
 
 Official Cockos REAPER SDK and WDL headers are downloaded into ignored `third_party/`. Original license notices remain intact. Tested SDK revision: `c0eafe87863b2bf69c5c822760f1b32a753b211b`; WDL revision: `61c5553aad0d257775a4dd7bf36b8be617ec8281`.
+
+## GitHub Actions and releases
+
+`Build and release` builds on pushes to `main`, pull requests, version tags and manual dispatch. macOS builds a single ad-hoc signed universal dylib; Windows builds an x64 DLL with a statically linked runtime. Both run the portable engine tests; macOS also runs Cocoa keyboard and mock-host integration tests. Native REAPER is not installed on CI runners.
+
+Push a new `v*` tag to publish a GitHub prerelease after both platform jobs pass. Each release contains platform ZIPs, installation instructions, SDK/WDL notices, and SHA-256 checksums. The first release is `v0.1.0`. The Windows overlay uses Win32 subclassing and a thread-local keyboard hook, sharing the curve/handle/vibrato/MIDI algorithms with macOS. It remains a live-UI preview until tested in Windows REAPER.
+
+CMake build (macOS with CMake or Windows with Visual Studio 2022 C++ tools and CMake):
+
+```sh
+python scripts/bootstrap.py
+cmake -S . -B build/cmake
+cmake --build build/cmake --config Release
+ctest --test-dir build/cmake -C Release --output-on-failure
+```
+
+On Windows use `-G "Visual Studio 17 2022" -A x64` when configuring. On macOS add `-DCMAKE_BUILD_TYPE=Release '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64' -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0` for a universal release build. Windows installation: copy `reaper_mpe_editor.dll` to the `UserPlugins` directory opened by **Options > Show REAPER resource path**, then restart REAPER. Windows uses Ctrl-Z/Ctrl-Shift-Z for undo/redo; F/S/V/0/Escape and mouse tools match macOS.
