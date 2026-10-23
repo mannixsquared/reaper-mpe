@@ -56,7 +56,7 @@ Calls exceeding 16 ms are recorded by operation name and elapsed time in `/tmp/r
 
 ## Build and install
 
-Requires macOS 11+, Apple Command Line Tools, REAPER, and js_ReaScriptAPI. Produces an ad-hoc signed universal Apple Silicon/Intel dylib.
+The shell scripts below build/install on macOS 11+ with Apple Command Line Tools, REAPER, and js_ReaScriptAPI. They produce an ad-hoc signed universal Apple Silicon/Intel dylib. Windows uses the CMake instructions below or the prebuilt x64 release archive.
 
 ```sh
 ./scripts/bootstrap.sh
@@ -82,13 +82,13 @@ Install defaults to `~/Library/Application Support/REAPER/UserPlugins/reaper_mpe
 - Application-entry event filtering with a test application that processes shortcuts before Cocoa view dispatch: plain/Shift F/S, repeat/release consumption, modified shortcut forwarding, text entry, and Escape swallowing after overlay removal.
 - Native accelerator fallback, timer cleanup, and immediate scroll mapping updates without MIDI-content changes.
 
-Source layout: `src/plugin.mm` contains the REAPER/Cocoa integration; `src/curve.h` contains curve and allocation logic; `src/view_state.h` parses editor geometry. Tests live in `tests/`.
+Source layout: `src/plugin.mm` contains the REAPER/Cocoa integration; `src/plugin_win.cpp` contains the Win32 overlay; `src/curve.h` contains curve and allocation logic; `src/view_state.h` parses editor geometry. Tests live in `tests/`.
 
 Official Cockos REAPER SDK and WDL headers are downloaded into ignored `third_party/`. Original license notices remain intact. Tested SDK revision: `c0eafe87863b2bf69c5c822760f1b32a753b211b`; WDL revision: `61c5553aad0d257775a4dd7bf36b8be617ec8281`.
 
 ## GitHub Actions and releases
 
-`Build and release` builds on pushes to `main`, pull requests, version tags and manual dispatch. macOS builds a single ad-hoc signed universal dylib; Windows builds an x64 DLL with a statically linked runtime. Both run the portable engine tests; macOS also runs Cocoa keyboard and mock-host integration tests. Native REAPER is not installed on CI runners.
+`Build and release` builds on pushes to `main`, pull requests, version tags and manual dispatch. macOS builds a single ad-hoc signed universal dylib; Windows builds an x64 DLL with a statically linked runtime. Both run the portable engine tests; macOS also runs Cocoa keyboard and mock-host integration tests; Windows verifies DLL loading, exports and clean unload. Native REAPER is not installed on CI runners.
 
 Push a new `v*` tag to publish a GitHub prerelease after both platform jobs pass. Each release contains platform ZIPs, installation instructions, SDK/WDL notices, and SHA-256 checksums. The first release is `v0.1.0`. The Windows overlay uses Win32 subclassing and a thread-local keyboard hook, sharing the curve/handle/vibrato/MIDI algorithms with macOS. It remains a live-UI preview until tested in Windows REAPER.
 

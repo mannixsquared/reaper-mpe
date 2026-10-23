@@ -162,6 +162,7 @@ struct Editor {
   if(vibrato){char text[80];snprintf(text,sizeof(text),"%.1f Hz / %.0f cents",rate,depth);label(text,445,false);}SelectObject(dc,font);
  }
  bool down(POINT p,bool alt,bool twice) {
+  SetFocus(piano);
   if(p.y<30 && p.x>=6 && p.x<(vibrato ? 620 : 440)) {
    if(p.x<108){smooth=false;vibrato=false;}else if(p.x<204){smooth=true;vibrato=false;}
    else if(p.x<270){vibrato=false;flat();}else if(p.x<358)vibrato=true;else if(p.x<440){closeEditor();return true;}redraw();return true;
